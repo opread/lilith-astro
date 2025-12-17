@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "astro-persona"
+version = "0.1.0"
+description = "AstroPersona project"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "pydantic",
+    "pyswisseph",
+    "google-generativeai",
+    "sqlalchemy",
+    "alembic",
+    "pytest",
+    "ruff"
+]

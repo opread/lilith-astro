@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: astro-persona
+Version: 0.1.0
+Summary: AstroPersona project
+Requires-Python: >=3.11
+Requires-Dist: fastapi
+Requires-Dist: pydantic
+Requires-Dist: pyswisseph
+Requires-Dist: google-generativeai
+Requires-Dist: sqlalchemy
+Requires-Dist: alembic
+Requires-Dist: pytest
+Requires-Dist: ruff

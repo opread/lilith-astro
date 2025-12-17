@@ -1,0 +1,8 @@
+fastapi
+pydantic
+pyswisseph
+google-generativeai
+sqlalchemy
+alembic
+pytest
+ruff

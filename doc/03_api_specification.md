@@ -1,4 +1,4 @@
-# 03. API Specification - AstroPersona V1
+# 03. API Specification - AstroPersona V1.1
 
 ## 1. General Info
 *   **Base URL**: `/api/v1`

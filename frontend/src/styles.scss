@@ -1,0 +1,33 @@
+@import "~bootstrap/scss/functions";
+
+// Define custom theme variables to override Bootstrap defaults (must come before variables import)
+$primary: #6c5ce7; // Deep purple
+$secondary: #2d3436; // Dark slate
+$info: #00cec9; // Aqua for data/info
+$success: #00b894; // Teal for success/output
+
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "info": $info,
+  "success": $success,
+);
+
+$dark-subtle: #1a1a1a;
+
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/bootstrap";
+
+// Custom styles for the app container
+.bg-dark {
+    background-color: #121212 !important; // Deeper black background
+}
+
+.bg-dark-subtle {
+    background-color: $dark-subtle !important;
+}
+
+.list-group-item.bg-secondary {
+    background-color: $secondary !important;
+}

@@ -4,7 +4,13 @@ import math
 from datetime import datetime
 from typing import List
 
-import swisseph as swe
+try:
+    import swisseph as swe
+except ImportError:
+    raise ImportError(
+        "The 'pyswisseph' package is not installed. This is a critical dependency for astrological calculations. "
+        "Please try to install it manually. If you are running tests, ensure this module is mocked."
+    )
 
 from src.core.domain.models import Aspect, BirthData, House, NatalChart, Planet
 

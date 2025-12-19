@@ -4,10 +4,13 @@ Version: 0.1.0
 Summary: AstroPersona project
 Requires-Python: >=3.11
 Requires-Dist: fastapi
+Requires-Dist: uvicorn
 Requires-Dist: pydantic
-Requires-Dist: pyswisseph
+Requires-Dist: pydantic-settings
 Requires-Dist: google-generativeai
 Requires-Dist: sqlalchemy
 Requires-Dist: alembic
 Requires-Dist: pytest
+Requires-Dist: httpx
+Requires-Dist: python-dotenv
 Requires-Dist: ruff

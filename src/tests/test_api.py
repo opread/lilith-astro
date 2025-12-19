@@ -4,16 +4,20 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 
-# Mock swisseph to avoid import error
+# Mock swisseph before it's imported by other modules
+import sys
 mock_swe = MagicMock()
+sys.modules['swisseph'] = mock_swe
+
+from src.core.domain.models import NatalChart, Planet, House, Aspect
+from src.interfaces.api.main import app
+import src.interfaces.api.v1 as v1_module
+
+# Set return values for mocked functions
 mock_swe.julday.return_value = 2448029.020833
-mock_swe.houses.return_value = ([0]*13, 0, 0, 0, 0)  # cusps, asc, mc, armc, vertex
-mock_swe.calc_ut.return_value = ((56.45, 0, 0, 1.0, 0), 0)  # pos, flag
+mock_swe.houses.return_value = ([0]*13, 0, 0, 0, 0)
+mock_swe.calc_ut.return_value = ((56.45, 0, 0, 1.0, 0), 0)
 mock_swe.house_pos.return_value = 9
-with patch.dict('sys.modules', {'swisseph': mock_swe}):
-    from src.core.domain.models import NatalChart, Planet, House, Aspect
-    from src.interfaces.api.main import app
-    import src.interfaces.api.v1 as v1_module  # Ensure v1 is imported for patching
 
 
 @pytest.fixture

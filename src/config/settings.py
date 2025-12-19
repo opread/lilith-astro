@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     app_env: str = "development"
     swiss_eph_path: str = "/usr/local/share/sweph"
-    google_api_key: str = "AIzaSyCn96ObkWTffnnd-COHx3MItD5-fzcVnTo"
+    google_api_key: str
 
     class Config:
         env_file = ".env"

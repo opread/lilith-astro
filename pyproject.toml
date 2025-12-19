@@ -9,11 +9,14 @@ description = "AstroPersona project"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi",
+    "uvicorn",
     "pydantic",
-    "pyswisseph",
+    "pydantic-settings",
     "google-generativeai",
     "sqlalchemy",
     "alembic",
     "pytest",
+    "httpx",
+    "python-dotenv",
     "ruff"
 ]

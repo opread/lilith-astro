@@ -1,8 +1,11 @@
 fastapi
+uvicorn
 pydantic
-pyswisseph
+pydantic-settings
 google-generativeai
 sqlalchemy
 alembic
 pytest
+httpx
+python-dotenv
 ruff

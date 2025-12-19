@@ -1,6 +1,6 @@
 {
   "name": "lilith-frontend",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Frontend UI for Lilith Application",
   "main": "index.js",
   "scripts": {

@@ -4,13 +4,7 @@ import math
 from datetime import datetime
 from typing import List
 
-try:
-    import swisseph as swe
-except ImportError:
-    raise ImportError(
-        "The 'pyswisseph' package is not installed. This is a critical dependency for astrological calculations. "
-        "Please try to install it manually. If you are running tests, ensure this module is mocked."
-    )
+import swisseph as swe
 
 from src.core.domain.models import Aspect, BirthData, House, NatalChart, Planet
 
@@ -46,13 +40,15 @@ class SwissEphemerisEngine:
 
     MAX_ORB = 10.0  # degrees
 
-    def __init__(self, eph_path: str = "/usr/local/share/sweph"):
+    def __init__(self, eph_path: str = ""):
         """Initialize the engine.
 
         Args:
             eph_path: Path to the ephemeris files.
         """
-        swe.set_ephe_path(eph_path)
+        # Only set ephemeris path if one is explicitly provided
+        if eph_path:
+            swe.set_ephe_path(eph_path)
 
     def calculate_chart(self, birth_data: BirthData) -> NatalChart:
         """Calculate the complete natal chart for given birth data.
@@ -104,7 +100,9 @@ class SwissEphemerisEngine:
         armc = houses_data[3]
         eps = houses_data[4]
         for name, planet_id in self.PLANETS:
-            pos = swe.calc_ut(jd, planet_id)
+            # Use high-precision flags (FLG_SWIEPH for calculation with JPL data)
+            flags = swe.FLG_SWIEPH | swe.FLG_SPEED | swe.FLG_ICRS
+            pos = swe.calc_ut(jd, planet_id, flags=flags)
             longitude = pos[0][0]
             speed = pos[0][3]  # daily speed
             is_retrograde = speed < 0

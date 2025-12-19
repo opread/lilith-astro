@@ -35,7 +35,7 @@ class GenerateHoroscopeUseCase:
         interpretation = interpret_chart(chart)
 
         # Prepare prompt
-        chart_dict = chart.dict()
+        chart_dict = chart.model_dump()
         chart_json = json.dumps(chart_dict, indent=2)
         prompt = NATAL_HOROSCOPE_PROMPT.format(chart_json=chart_json)
 

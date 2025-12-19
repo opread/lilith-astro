@@ -1,15 +1,16 @@
 """Application settings using Pydantic."""
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
     app_env: str = "development"
-    swiss_eph_path: str = "/usr/local/share/sweph"
+    swiss_eph_path: str = ""
     google_api_key: str
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False
+    )

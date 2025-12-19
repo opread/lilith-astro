@@ -109,9 +109,9 @@ async def calculate_chart(
     # For now, meta is empty, as julian_day is not in NatalChart
     return CalculateChartResponse(
         meta={"julian_day": chart.julian_day},
-        planets=[PlanetResponse(**p.dict()) for p in chart.planets],
-        houses=[HouseResponse(**h.dict()) for h in chart.houses],
-        aspects=[AspectResponse(**a.dict()) for a in chart.aspects]
+        planets=[PlanetResponse(**p.model_dump()) for p in chart.planets],
+        houses=[HouseResponse(**h.model_dump()) for h in chart.houses],
+        aspects=[AspectResponse(**a.model_dump()) for a in chart.aspects]
     )
 
 @router.post("/horoscope/personal", response_model=HoroscopePersonalResponse)
@@ -145,7 +145,7 @@ async def generate_personal_horoscope(
     repo.save_chart(user_id, horoscope_output.chart)
 
     return HoroscopePersonalResponse(
-        chart=horoscope_output.chart.dict(),
-        interpretation=horoscope_output.interpretation.dict(),
+        chart=horoscope_output.chart.model_dump(),
+        interpretation=horoscope_output.interpretation.model_dump(),
         ai_text=horoscope_output.ai_text
     )

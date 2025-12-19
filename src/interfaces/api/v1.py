@@ -60,6 +60,7 @@ class HoroscopePersonalRequest(BaseModel):
 
     profile: Profile
     preferences: Preferences
+    admin: bool = False
 
 # Response models
 class PlanetResponse(BaseModel):
@@ -86,10 +87,18 @@ class CalculateChartResponse(BaseModel):
     houses: list[HouseResponse]
     aspects: list[AspectResponse]
 
+class ProcessingStepsResponse(BaseModel):
+    coordinates: dict
+    time_correction: dict
+    chart_generation: dict
+    relationship_mapping: dict
+    pm_config: dict
+
 class HoroscopePersonalResponse(BaseModel):
     chart: dict
     interpretation: dict
     ai_text: str
+    processing_steps: ProcessingStepsResponse | None = None
 
 @router.post("/chart/calculate", response_model=CalculateChartResponse)
 async def calculate_chart(
@@ -144,8 +153,48 @@ async def generate_personal_horoscope(
     repo.save_profile(profile)
     repo.save_chart(user_id, horoscope_output.chart)
 
+    # Build processing steps for admin mode
+    processing_steps = None
+    if request.admin:
+        processing_steps = ProcessingStepsResponse(
+            coordinates={
+                "latitude": request.profile.latitude,
+                "longitude": request.profile.longitude,
+                "timezone": "UTC"
+            },
+            time_correction={
+                "local_time": request.profile.birth_time,
+                "universal_time": "12:00:00",  # Mock conversion
+                "offset": "0:00"
+            },
+            chart_generation={
+                "planets": [
+                    {"name": "Sun", "degree": 15.5, "sign": "Aries"},
+                    {"name": "Moon", "degree": 22.1, "sign": "Libra"},
+                    {"name": "Ascendant", "degree": 5.0, "sign": "Cancer"}
+                ],
+                "houses": [
+                    {"number": 1, "degree": 5.0, "sign": "Cancer"},
+                    {"number": 2, "degree": 35.0, "sign": "Leo"}
+                ]
+            },
+            relationship_mapping={
+                "aspects": [
+                    {"planet1": "Sun", "planet2": "Moon", "type": "Opposition", "orb": 1.6}
+                ]
+            },
+            pm_config={
+                "house_system": "Placidus",
+                "ephemeris_source": "SwissEphemeris",
+                "interpretation_engine": "Hybrid",
+                "ai_model": "Gemini",
+                "temperature": 0.7
+            }
+        )
+
     return HoroscopePersonalResponse(
         chart=horoscope_output.chart.model_dump(),
         interpretation=horoscope_output.interpretation.model_dump(),
-        ai_text=horoscope_output.ai_text
+        ai_text=horoscope_output.ai_text,
+        processing_steps=processing_steps
     )

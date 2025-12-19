@@ -1,5 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 module.exports = {
   entry: './src/index.tsx',
@@ -31,6 +33,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
+    }),
+    new webpack.DefinePlugin({
+      'process.env.GOOGLE_MAPS_API_KEY': JSON.stringify(process.env.GOOGLE_MAPS_API_KEY),
     }),
   ],
   // Suppress Sass warnings (from bootstrap/deps) so the overlay is clean.

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AstrologicalChart from './types/AstrologicalChart';
 import HoroscopeNarrative from './types/HoroscopeNarrative';
+import ProcessingSteps from './types/ProcessingSteps';
 import { UserInput } from './components/InputForm';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1'; // Assuming the backend runs on port 8000
@@ -8,6 +9,7 @@ const API_BASE_URL = 'http://localhost:8000/api/v1'; // Assuming the backend run
 interface ProcessFlowResult {
   chart: AstrologicalChart;
   narrative: HoroscopeNarrative;
+  processingSteps?: ProcessingSteps;
 }
 
 /**
@@ -63,7 +65,44 @@ export const processFlow = async (input: UserInput): Promise<ProcessFlowResult> 
         rawAiOutput: '{"sun_in_aries": "dynamic", "moon_in_libra": "balanced", "model_version": "GPT-4.5-LILITH"}'
       };
 
-      resolve({ chart: mockChart, narrative: mockNarrative });
+      // Build processing steps for admin mode
+      const processingSteps = input.isAdmin ? {
+        coordinates: {
+          latitude: input.latitude,
+          longitude: input.longitude,
+          timezone: "UTC"
+        },
+        time_correction: {
+          local_time: input.time,
+          universal_time: "12:00:00",
+          offset: "0:00"
+        },
+        chart_generation: {
+          planets: [
+            { name: "Sun", degree: 15.5, sign: "Aries" },
+            { name: "Moon", degree: 22.1, sign: "Libra" },
+            { name: "Ascendant", degree: 5.0, sign: "Cancer" }
+          ],
+          houses: [
+            { number: 1, degree: 5.0, sign: "Cancer" },
+            { number: 2, degree: 35.0, sign: "Leo" }
+          ]
+        },
+        relationship_mapping: {
+          aspects: [
+            { planet1: "Sun", planet2: "Moon", type: "Opposition", orb: 1.6 }
+          ]
+        },
+        pm_config: {
+          house_system: input.houseSystem,
+          ephemeris_source: input.ephemerisSource,
+          interpretation_engine: input.interpretationEngine,
+          ai_model: input.aiModel,
+          temperature: input.aiTemperature
+        }
+      } : undefined;
+
+      resolve({ chart: mockChart, narrative: mockNarrative, processingSteps });
     }, 1500); // Simulate network delay
   });
   // --- END MOCK API RESPONSE ---

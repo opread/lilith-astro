@@ -1,10 +1,14 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { geocodeLocation } from '../utils/geocoding';
+import MapPicker from './MapPicker';
 
 export interface UserInput {
   name: string;
   date: string; // YYYY-MM-DD
   time: string; // HH:MM
   location: string;
+  latitude: number;
+  longitude: number;
   // Calculation Parameters (PM Exposure)
   houseSystem: 'Placidus' | 'Koch' | 'Regiomontanus';
   ephemerisSource: 'SwissEphemeris' | 'NASA';
@@ -15,6 +19,7 @@ export interface UserInput {
   aiModel: 'Gemini' | 'GPT-4' | 'Custom';
   aiTemperature: number; // 0.0 to 1.0
   aiPromptVersion: string;
+  isAdmin: boolean;
 }
 
 interface InputFormProps {
@@ -28,6 +33,8 @@ const defaultInput: UserInput = {
   date: '1990-01-01',
   time: '12:00',
   location: 'London, UK',
+  latitude: 51.5074,
+  longitude: -0.1278,
   houseSystem: 'Placidus',
   ephemerisSource: 'SwissEphemeris',
   interpretationEngine: 'Hybrid',
@@ -35,24 +42,92 @@ const defaultInput: UserInput = {
   aiModel: 'Gemini',
   aiTemperature: 0.7,
   aiPromptVersion: 'v1.2-beta',
+  isAdmin: false,
 };
 
 const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, isAdmin }) => {
-  const [input, setInput] = useState<UserInput>(defaultInput);
+  const [input, setInput] = useState<UserInput>({...defaultInput, isAdmin});
   const [isPMConfigOpen, setIsPMConfigOpen] = useState(false);
+  const [locationSearchStatus, setLocationSearchStatus] = useState<'idle' | 'searching' | 'found' | 'not-found'>('idle');
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const [coordinateSource, setCoordinateSource] = useState<'none' | 'manual' | 'geocoded'>('geocoded');
+
+  const handleGeocode = useCallback(async (location: string) => {
+    if (!location) {
+      setLocationSearchStatus('idle');
+      setCoordinateSource('none');
+      setInput(prev => ({ ...prev, latitude: 0, longitude: 0 }));
+      return;
+    }
+    setLocationSearchStatus('searching');
+    const result = await geocodeLocation(location);
+
+    if (result) {
+      setLocationSearchStatus('found');
+      setCoordinateSource('geocoded');
+      setInput(prev => ({
+        ...prev,
+        latitude: result.lat,
+        longitude: result.lon,
+      }));
+    } else {
+      setLocationSearchStatus('not-found');
+      setCoordinateSource('none');
+      setInput(prev => ({ ...prev, latitude: 0, longitude: 0 }));
+    }
+  }, []);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
+    
+    if (name === 'location') {
+      // Clear coordinates on location change and mark as 'none' source, pending search
+      setInput(prev => ({
+        ...prev,
+        location: value,
+        latitude: 0,
+        longitude: 0,
+      }));
+      setCoordinateSource('none');
+      setLocationSearchStatus('idle'); // Will search on blur/submit
+    } else {
+      setInput(prev => ({
+        ...prev,
+        [name]: type === 'number' ? parseFloat(value) : value,
+      }));
+    }
+  }, []);
+
+  const handleLocationBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.target.name === 'location' && e.target.value && locationSearchStatus === 'idle') {
+      handleGeocode(e.target.value);
+    }
+  }, [handleGeocode, locationSearchStatus]);
+
+  const handleSelectCoordinates = useCallback((lat: number, lon: number) => {
     setInput(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseFloat(value) : value,
+      latitude: lat,
+      longitude: lon,
     }));
+    setCoordinateSource('manual');
+    setShowMapPicker(false);
   }, []);
+
+  const handleManualEntry = () => {
+    setCoordinateSource('manual');
+    setLocationSearchStatus('found'); // Treat manual entry as "found" for UI logic
+  }
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
+    // Only proceed if coordinates are available or manually entered.
+    if (input.latitude === 0 && input.longitude === 0 && coordinateSource !== 'manual') {
+      alert("Please enter coordinates manually or pick them on the map.");
+      return;
+    }
     onSubmit(input);
-  }, [input, onSubmit]);
+  }, [input, onSubmit, coordinateSource]);
 
   const pmConfigSection = useMemo(() => (
     <div className="card bg-secondary-subtle border-0 mt-4 p-3">
@@ -154,10 +229,78 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, isAdmin }) =
             </div>
             <div className="col-md-4">
               <label htmlFor="location" className="form-label text-light">Birth Location (City, Country)</label>
-              <input type="text" id="location" name="location" className="form-control" value={input.location} onChange={handleChange} required />
+              <input type="text" id="location" name="location" className="form-control" value={input.location} onChange={handleChange} onBlur={handleLocationBlur} required />
             </div>
+            
+            {locationSearchStatus === 'searching' && (
+              <div className="col-12 text-light">
+                <i className="bi bi-arrow-clockwise spinner-border-sm me-2"></i> Searching for coordinates...
+              </div>
+            )}
+            
+            {locationSearchStatus === 'not-found' && coordinateSource === 'none' && (
+              <div className="col-12 text-light">
+                <span className="text-danger">Location not automatically resolved.</span>
+                <button type="button" className="btn btn-sm btn-outline-warning ms-3 me-2" onClick={handleManualEntry}>
+                  Enter Coordinates Manually
+                </button>
+                <button type="button" className="btn btn-sm btn-outline-info" onClick={() => setShowMapPicker(true)}>
+                  Pick on Map
+                </button>
+              </div>
+            )}
+            
+            {(coordinateSource === 'geocoded' || coordinateSource === 'manual') && (
+              <>
+                <div className="col-md-4">
+                  <label htmlFor="latitude" className="form-label text-light">Latitude</label>
+                  <input
+                    type="number"
+                    id="latitude"
+                    name="latitude"
+                    className="form-control"
+                    value={input.latitude}
+                    onChange={handleChange}
+                    step="0.0001"
+                  />
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="longitude" className="form-label text-light">Longitude</label>
+                  <div className="input-group">
+                    <input
+                      type="number"
+                      id="longitude"
+                      name="longitude"
+                      className="form-control"
+                      value={input.longitude}
+                      onChange={handleChange}
+                      step="0.0001"
+                    />
+                    {/* Admin Verify Coordinates Button (Task 4) */}
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => window.open(`https://maps.google.com/?q=${input.latitude},${input.longitude}`, '_blank')}
+                        title="Verify Location in Google Maps"
+                      >
+                        <i className="bi bi-globe"></i>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
+          <MapPicker
+            show={showMapPicker}
+            onClose={() => setShowMapPicker(false)}
+            onSelectCoordinates={handleSelectCoordinates}
+            initialLat={input.latitude || defaultInput.latitude}
+            initialLon={input.longitude || defaultInput.longitude}
+          />
+          
           {/* PM Configuration Toggle */}
           {isAdmin && (
             <div className="d-grid mt-4">

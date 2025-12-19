@@ -114,7 +114,7 @@ The flagship endpoint. Calculates the chart, applies rules, and generates AI tex
     ]
   },
   "ai_metadata": {
-    "model": "gpt-4",
+    "model": "gemini-pro",
     "tokens_used": 450
   }
 }

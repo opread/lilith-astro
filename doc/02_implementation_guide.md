@@ -12,6 +12,7 @@ src/
 │   │
 │   └── use_cases/          # Application Business Rules
 │       ├── calculate_chart.py
+│       ├── interpret_chart.py
 │       └── generate_horoscope.py
 │
 ├── infrastructure/         # Outer Layer: Frameworks & Drivers
@@ -20,12 +21,11 @@ src/
 │   ├── ai/                 # Implementation of AI Interface
 │   │   └── gemini_adapter.py
 │   └── persistence/        # Database Repositories
-│       └── postgres_repo.py
+│       └── in_memory_repo.py # Current: In-memory implementation
 │
 ├── interfaces/             # Interface Adapters
 │   ├── api/                # FastAPI Controllers (Routers)
-│   │   ├── v1/
-│   │   │   └── horoscope.py
+│   │   ├── v1.py           # API v1 Router
 │   │   └── main.py         # App Entrypoint
 │   └── cli/                # (Optional) CLI commands
 │
@@ -55,7 +55,7 @@ src/
 
 ### Phase 2: Rules Engine
 **Goal**: Transform mathematical data into basic text tokens.
-1.  Define rule schemas (JSON/YAML) mapping aspects to meanings.
+1.  Define rules (currently Python dictionaries in `src/core/domain/rules.py`) mapping aspects/placements to traits.
 2.  Implement the Interpretation logic in `src/core/use_cases`.
 
 ### Phase 3: API & Basic Persistence

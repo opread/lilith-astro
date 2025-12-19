@@ -11,12 +11,13 @@ We will adopt a **Modular Monolith** architecture with **Clean Architecture** pr
 ## 3. High-Level Design (C4 Model)
 
 ### 3.1 System Context
-The user interacts with the AstroPersona API via a client application (Web/Mobile) or directly as a B2B integration.
+The user interacts with the AstroPersona API via a React Frontend application.
 
 ```mermaid
 graph LR
-    User[End User / B2B Client] -->|HTTP Requests| System[AstroPersona System]
-    System -->|Queries| LLM[Google Gemini API]
+    User[End User] -->|Interacts| Frontend[React Single Page App]
+    Frontend -->|HTTP API Calls| Backend[AstroPersona Backend (FastAPI)]
+    Backend -->|Queries| LLM[Google Gemini API]
 ```
 
 ### 3.2 Container Diagram
@@ -24,9 +25,9 @@ The system is composed of the following distinct logical containers (modules):
 
 ```mermaid
 graph TD
-    Client[Client App] -->|HTTPS| API[API Gateway / Controller Layer]
+    Frontend[React Frontend] -->|HTTPS| API[API Gateway / Controller Layer]
     
-    subgraph "AstroPersona Application"
+    subgraph "AstroPersona Backend"
         API --> Service[Service Layer]
         
         subgraph "Core Domain"
@@ -37,14 +38,12 @@ graph TD
         subgraph "Infrastructure / Adapters"
             Service --> AISvc[AI Service Adapter]
             Service --> Repo[Persistence Adapter]
-            Service --> Cache[Cache Adapter]
         end
     end
     
     AstroEng -->|Uses| SwissEph[Swiss Ephemeris Lib]
     AISvc -->|API Call| Gemini[Google Gemini API]
-    Repo -->|SQL| DB[(PostgreSQL)]
-    Cache -->|TCP| Redis[(Redis)]
+    Repo -->|In-Memory| MemStore[(Memory Dict)]
 ```
 
 ## 4. Key Components
@@ -65,23 +64,37 @@ graph TD
 *   **Characteristics**: Asynchronous, failure-tolerant (circuit breaker pattern).
 *   **Integration**: Uses **Google Gemini API** for high-quality, context-aware generation. Prompts are constructed using data from the Interpretation Engine.
 
-### 4.4 Persistence & Caching
-*   **Database**: PostgreSQL for storing user profiles and generated reports.
-*   **Cache**: Redis for caching heavy astronomical calculations (optional for v1, recommended for scale) and rate limiting.
+### 4.4 Persistence (Current State)
+*   **Repository**: Currently implemented as an **In-Memory Repository** (`InMemoryRepository`).
+*   **Storage**: Data (Profiles, Charts) is stored in Python dictionaries (`Dict[str, Model]`) within the application process.
+*   **Implication**: Data is ephemeral and is lost when the application restarts. This is suitable for the current development/prototype phase.
 
 ## 5. Technology Stack
 
 | Component | Technology | Rationale |
 |-----------|------------|-----------|
-| **Language** | Python 3.11+ | Native support for `pyswisseph`, strong AI ecosystem (LangChain, etc.), robust web frameworks. |
-| **Web Framework** | FastAPI | High performance (ASGI), auto-documentation (OpenAPI), strict typing (Pydantic). |
+| **Frontend** | React + TypeScript | Modern, type-safe UI with rich component ecosystem. |
+| **Backend Language** | Python 3.11+ | Native support for `pyswisseph`, strong AI ecosystem. |
+| **Web Framework** | FastAPI | High performance (ASGI), auto-documentation (OpenAPI), strict typing. |
 | **Astro Library** | pyswisseph | The gold standard for astrological precision. |
-| **Database** | PostgreSQL | Robust, relational, supports JSONB for flexible report storage. |
-| **Containerization** | Docker | Standard for deployment and environment consistency. |
+| **Persistence** | In-Memory (Dict) | rapid prototyping; zero external dependencies. |
 | **Testing** | Pytest | Industry standard for Python testing. |
 | **Linting/Formatting** | Ruff | High-speed linting. |
 
-## 6. Scalability & Performance
+## 6. Future Work & Roadmap
+To move from the current prototype to a production-ready system, the following architectural changes are planned:
+
+### 6.1 Persistence Layer Upgrade
+*   **Goal**: Replace `InMemoryRepository` with a persistent database adapter.
+*   **Target**: **PostgreSQL**.
+*   **Why**: To persist user profiles and historical chart readings across sessions and restarts. The current Repository pattern allows this switch without changing Core Domain logic.
+
+### 6.2 Caching Layer
+*   **Goal**: Implement a caching adapter.
+*   **Target**: **Redis**.
+*   **Why**: To cache heavy astronomical calculations (keyed by lat/long/time) and expensive AI API responses to reduce costs and latency.
+
+## 7. Scalability & Performance
 *   **Stateless API**: The application layer is stateless, allowing horizontal scaling behind a load balancer.
 *   **Caching Strategy**:
     *   **L1 Cache**: In-memory (LRU) for frequently accessed static data (e.g., rule definitions).

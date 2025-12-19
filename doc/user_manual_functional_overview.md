@@ -6,15 +6,19 @@ AstroPersona is a sophisticated tool that combines precise astronomical mathemat
 
 ---
 
-## 1. Core Functionality: The Calculation
+## 1. Core Functionality: The Calculation Process
 
-The foundation of any personalized horoscope is an accurate natal chart. AstroPersona uses the **Swiss Ephemeris** library—the gold standard in astronomical calculation—to ensure precision.
+The foundation of any personalized horoscope is an accurate natal chart. AstroPersona provides complete transparency into this process, displaying each calculation step.
 
-### What We Do:
-When you provide your birth date, exact time, and location (latitude/longitude), the system performs the following actions:
-1.  **Time Correction**: Converts your local birth time, using your specified time zone (e.g., Europe/Bucharest), into Universal Time (UT).
-2.  **Chart Generation**: Calculates the exact degrees of all major planets (Sun, Moon, Mercury, etc.) and the precise positions of the 12 Astrological Houses (Ascendant, Midheaven, etc.).
-3.  **Relationship Mapping**: Identifies the key relationships between these bodies (Aspects), such as Trines, Squares, and Oppositions, along with their associated orbs.
+### Detailed Processing Steps:
+When you provide your birth date, exact time, and location, the system performs the following actions, visible in the "Processing Steps" dashboard:
+
+1.  **Coordinates Extraction**: Converts your city/location into precise Latitude and Longitude coordinates.
+2.  **Time Correction**: Converts your local birth time into Universal Time (UT) based on the specific timezone offset of your birth location.
+3.  **Chart Generation**:
+    *   Calculates the exact degrees of all major planets (Sun, Moon, Mercury, etc.).
+    *   Calculates the precise positions of the 12 Astrological Houses (Ascendant, Midheaven, etc.) based on your chosen House System.
+4.  **Relationship Mapping**: Identifies the key relationships between these bodies (Aspects), such as Trines, Squares, and Oppositions, along with their associated orbs.
 
 The result is a complete, scientifically accurate Natal Chart, ready for interpretation.
 
@@ -38,13 +42,22 @@ The structured interpretation data is then fed to the **Google Gemini AI model**
 2.  **Natural Language**: Ensures the reading feels like it was written by a human astrologer, going beyond simple definitions to describe the interplay between various energies.
 3.  **Customization**: Adjusts the language, tone, and focus of the reading based on your provided preferences.
 
-## 4. Customizing Your Reading
+## 4. Advanced Customization & Configuration
 
-When requesting your personalized horoscope, you can tailor the output to focus on specific areas of your life:
+AstroPersona offers granular control over both the astronomical calculations and the AI generation process. This "Product Manager" level configuration allows for diverse astrological experiments.
 
-| Preference | Description | Options |
+### Astronomical Parameters
+| Parameter | Description | Options |
 | :--- | :--- | :--- |
-| **Tone** | Sets the emotional and intellectual style of the writing. | `spiritual`, `psychological`, `practical` |
-| **Focus** | Directs the narrative to analyze specific areas of your life in depth. | `general`, `love`, `career` |
+| **House System** | Determines how the 12 houses are calculated. | `Placidus` (Default), `Koch`, `Regiomontanus` |
+| **Ephemeris Source** | The source of astronomical data. | `Swiss Ephemeris` (Standard), `NASA JPL` (Experimental) |
+
+### AI & Narrative Parameters
+| Parameter | Description | Options |
+| :--- | :--- | :--- |
+| **Interpretation Engine** | Controls how much freedom the AI has. | `RuleBased` (Strict), `Hybrid` (Balanced), `PureAI` (Creative) |
+| **Narrative Style** | Sets the tone of the output. | `Professional` (Neutral), `Poetic` (Evocative), `Debug` (Technical) |
+| **AI Model** | The underlying Large Language Model used. | `Gemini`, `GPT-4`, `Custom` |
+| **Temperature** | Controls the "creativity" or randomness of the AI (0.0 - 1.0). | Lower (e.g., 0.2) is more deterministic; Higher (e.g., 0.8) is more creative. |
 
 By combining unparalleled astronomical precision, structured astrological rules, and state-of-the-art AI narrative generation, AstroPersona provides a premium and profound personal insight.

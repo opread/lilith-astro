@@ -10,9 +10,10 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi",
     "uvicorn",
+    "pyswisseph>=2.10.3",
     "pydantic",
     "pydantic-settings",
-    "google-generativeai",
+    "google-genai",
     "sqlalchemy",
     "alembic",
     "pytest",

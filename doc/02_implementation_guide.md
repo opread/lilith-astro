@@ -39,6 +39,7 @@ src/
 *   **FastAPI**: Web framework.
 *   **Pydantic**: Data validation and settings management.
 *   **pyswisseph**: Python extension to the Swiss Ephemeris library.
+    *   **Windows prerequisite**: install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) before running `pip install pyswisseph`; the package compiles native extensions and requires the MSVC toolchain.
 *   **google-generativeai**: Official Google Gemini SDK for Python.
 *   **LangChain** (optional but recommended): For structured interaction with LLMs.
 *   **SQLAlchemy** (Async): ORM for database interactions.
